@@ -4,12 +4,54 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 )
+
+type ConfigOption func(*HAProxyConfig) error
+
+// NewHAProxyConfig creates a new HAProxyConfig object
+func NewHAProxyConfig(proxyUrl string, opts ...ConfigOption) (*HAProxyConfig, error) {
+	endpoint, err := url.Parse(fmt.Sprintf("%s/", strings.TrimRight(proxyUrl, "/")))
+	if err != nil {
+		return nil, err
+	}
+	c := &HAProxyConfig{
+		URL: *endpoint,
+	}
+	for _, opt := range opts {
+		if err := opt(c); err != nil {
+			return nil, err
+		}
+	}
+	return c, nil
+}
+
+func WithStatsPath(path string) ConfigOption {
+	return func(c *HAProxyConfig) error {
+		c.StatsPath = path
+		return nil
+	}
+}
+
+func WithAuthString(auth string) ConfigOption {
+	return func(c *HAProxyConfig) error {
+		return c.SetCredentialsFromAuthString(auth)
+	}
+}
+
+func WithAuthInfo(user string, pass string) ConfigOption {
+	return func(c *HAProxyConfig) error {
+		c.Username = user
+		c.Password = pass
+		return nil
+	}
+}
 
 // HAProxyConfig holds the basic configuration options for haproxyctl
 type HAProxyConfig struct {
 	URL       url.URL
+	StatsPath string
 	Username  string
 	Password  string
 	client    *http.Client
@@ -96,6 +138,43 @@ type Statistic struct {
 	AvgConnectTime          uint64    `csv:"ctime"`
 	AvgResponseTime         uint64    `csv:"rtime"`
 	AvgTotalTime            uint64    `csv:"ttime"`
+	AgentStatus             uint64    `csv:"agent_status"`
+	AgentCode               uint64    `csv:"agent_code"`
+	AgentDuration           uint64    `csv:"agent_duration"`
+	CheckDesc               string    `csv:"check_desc"`
+	AgentDesc               string    `csv:"agent_desc"`
+	CheckRise               uint64    `csv:"check_rise"`
+	CheckFall               uint64    `csv:"check_fall"`
+	CheckHealth             uint64    `csv:"check_health"`
+	AgentRise               uint64    `csv:"agent_rise"`
+	AgentFall               uint64    `csv:"agent_fall"`
+	AgentHealth             uint64    `csv:"agent_health"`
+	Address                 string    `csv:"addr"`
+	Cookie                  uint64    `csv:"cookie"`
+	Mode                    string    `csv:"mode"`
+	LBAlgorithm             string    `csv:"algo"`
+	ConnRate                uint64    `csv:"conn_rate"`
+	ConnRateMax             uint64    `csv:"conn_rate_max"`
+	ConnTotal               uint64    `csv:"conn_tot"`
+	Intercepted             uint64    `csv:"intercepted"`
+	DeniedCon               uint64    `csv:"dcon"`
+	DeniedSes               uint64    `csv:"dses"`
+	Wrew                    uint64    `csv:"wrew"`
+	Connect                 uint64    `csv:"connect"`
+	Reuse                   uint64    `csv:"reuse"`
+	CacheLookups            uint64    `csv:"cache_lookups"`
+	CacheHits               uint64    `csv:"cache_hits"`
+	IdleConAvail            uint64    `csv:"srv_icur"`
+	IdleConLimit            uint64    `csv:"src_ilim"`
+	QtimeMax                uint64    `csv:"qtime_max"`
+	CtimeMax                uint64    `csv:"ctime_max"`
+	RtimeMax                uint64    `csv:"rtime_max"`
+	TtimeMax                uint64    `csv:"ttime_max"`
+	InternalErr             uint64    `csv:"eint"`
+	IdleConnCur             uint64    `csv:"idle_conn_cur"`
+	SafeConnCur             uint64    `csv:"safe_conn_cur"`
+	UsedConnCur             uint64    `csv:"used_conn_cur"`
+	NeedConnEst             uint64    `csv:"need_conn_est"`
 }
 
 // Duration is a type that we can attach CSV marshalling to for getting time.Duration

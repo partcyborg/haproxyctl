@@ -48,10 +48,14 @@ func (c *HAProxyConfig) GetStats() (*Statistics, error) {
 // GetRequestURI returns the URL to be used when sending a request
 func (c *HAProxyConfig) GetRequestURI(csv bool) string {
 	c.setupClient()
-	if csv {
-		return fmt.Sprintf("%vhaproxy;csv", c.URL.String())
+	if len(c.StatsPath) == 0 {
+		c.StatsPath = "haproxy"
 	}
-	return fmt.Sprintf("%vhaproxy", c.URL.String())
+	uri := fmt.Sprintf("%s%s", c.URL.String(), c.StatsPath)
+	if csv {
+		return fmt.Sprintf("%s;csv", uri)
+	}
+	return uri
 }
 
 // SetCredentialsFromAuthString is used when you have credentails in an auth string, but don't want to send

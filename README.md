@@ -35,15 +35,14 @@ import (
 )
 
 func main() {
-	//Create a simple URL to our HAProxy endpoint
-	endpoint, _ := url.Parse("http://10.1.8.20:7003/")
-	//Create our config item. We could specify our username/password here, but we will specify it encoded later on
-	thisConfig := haproxyctl.HAProxyConfig{
-		URL: *endpoint,
-	}
+   // Create a basic haproxyctl config object
+   thisConfig, err := haproxyctl.NewHAProxyConfig("http://10.1.8.20:7003/")
+   if err != nil {
+      fmt.Println(err)
+      return
+   }
 	//Pass through our encoded username/password
-	err := thisConfig.SetCredentialsFromAuthString("dXNlcm5hbWU6cGFzc3dvcmQ=")
-	if err != nil {
+	if err := thisConfig.SetCredentialsFromAuthString("dXNlcm5hbWU6cGFzc3dvcmQ="); err != nil {
 		fmt.Println(err)
 		return
 	}
@@ -77,12 +76,12 @@ import (
 )
 
 func main() {
-	//Create a simple URL to our HAProxy endpoint
-	endpoint, _ := url.Parse("http://10.1.8.20:7003/")
-	//Create our config item. We could specify our username/password here, but we will specify it encoded later on
-	thisConfig := haproxyctl.HAProxyConfig{
-		URL: *endpoint,
-	}
+   // Create a basic haproxyctl config object
+   thisConfig, err := haproxyctl.NewHAProxyConfig("http://10.1.8.20:7003/")
+   if err != nil {
+      fmt.Println(err)
+      return
+   }
 	//Pass through our encoded username/password
 	err := thisConfig.SetCredentialsFromAuthString("dXNlcm5hbWU6cGFzc3dvcmQ=")
 	if err != nil {
