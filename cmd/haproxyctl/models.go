@@ -24,6 +24,7 @@ func NewHAProxyConfig(proxyUrl string, opts ...ConfigOption) (*HAProxyConfig, er
 			return nil, err
 		}
 	}
+	c.setupClient()
 	return c, nil
 }
 
@@ -48,6 +49,13 @@ func WithAuthInfo(user string, pass string) ConfigOption {
 	}
 }
 
+func WithHttpClient(client *http.Client) ConfigOption {
+	return func(c *HAProxyConfig) error {
+		c.client = client
+		return nil
+	}
+}
+
 // HAProxyConfig holds the basic configuration options for haproxyctl
 type HAProxyConfig struct {
 	URL       url.URL
@@ -63,10 +71,11 @@ func (c *HAProxyConfig) setupClient() {
 		return
 	}
 
-	c.client = &http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
+	if c.client == nil {
+		c.client = &http.Client{}
+	}
+	c.client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+		return http.ErrUseLastResponse
 	}
 	c.setupdone = true
 }
