@@ -204,6 +204,10 @@ func (date *Duration) UnmarshalCSV(csv string) (err error) {
 	return nil
 }
 
+func (date *Duration) MarshalCSV() (string, error) {
+	return fmt.Sprintf("%d", date.Nanoseconds()), nil
+}
+
 // You could also use the standard Stringer interface
 func (date *Duration) String() string {
 	return time.Duration(date.Nanoseconds()).String()
