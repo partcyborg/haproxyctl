@@ -2,6 +2,7 @@ package haproxyctl
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
@@ -20,6 +21,11 @@ func (c *HAProxyConfig) GetStats() (*Statistics, error) {
 	}
 	if c.Username != "" {
 		req.SetBasicAuth(c.Username, c.Password)
+	}
+	if c.StatsTimeout > 0 {
+		ctx, cancel := context.WithTimeout(context.Background(), c.StatsTimeout)
+		defer cancel()
+		req = req.WithContext(ctx)
 	}
 
 	resp, err := c.client.Do(req)

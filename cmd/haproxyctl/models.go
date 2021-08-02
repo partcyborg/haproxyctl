@@ -56,14 +56,22 @@ func WithHttpClient(client *http.Client) ConfigOption {
 	}
 }
 
+func WithStatsTimeout(timeout time.Duration) ConfigOption {
+	return func(c *HAProxyConfig) error {
+		c.StatsTimeout = timeout
+		return nil
+	}
+}
+
 // HAProxyConfig holds the basic configuration options for haproxyctl
 type HAProxyConfig struct {
-	URL       url.URL
-	StatsPath string
-	Username  string
-	Password  string
-	client    *http.Client
-	setupdone bool
+	URL          url.URL
+	StatsPath    string
+	Username     string
+	Password     string
+	StatsTimeout time.Duration
+	client       *http.Client
+	setupdone    bool
 }
 
 func (c *HAProxyConfig) setupClient() {
